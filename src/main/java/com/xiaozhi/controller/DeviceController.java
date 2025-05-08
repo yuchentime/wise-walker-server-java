@@ -183,7 +183,11 @@ public class DeviceController {
                             device.setDeviceName("小智");
                             int row = deviceService.add(device);
                             if (row > 0) {
-                                refreshSessionConfig(device);
+                                String deviceId = device.getDeviceId();
+                                String sessionId = sessionManager.getSessionByDeviceId(deviceId);
+                                if (sessionId != null) {
+                                    sessionManager.closeSession(sessionId);
+                                }
                                 return AjaxResult.success();
                             } else {
                                 return AjaxResult.error();
