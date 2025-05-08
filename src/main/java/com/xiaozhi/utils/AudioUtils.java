@@ -19,6 +19,7 @@ public class AudioUtils {
     public static final int CHANNELS = 1; // 单声道
     public static final int BITRATE = 24000; // 24kbps比特率
     public static final int SAMPLE_FORMAT = avutil.AV_SAMPLE_FMT_S16; // 16位PCM
+    public static final int OPUS_FRAME_DURATION_MS = 60; // OPUS帧持续时间（毫秒）
 
     /**
      * 将原始音频数据保存为MP3文件

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AudioService {
     private static final Logger logger = LoggerFactory.getLogger(AudioService.class);
 
-    private static final long OPUS_FRAME_INTERVAL_MS = 60;
+    private static final long OPUS_FRAME_INTERVAL_MS = AudioUtils.OPUS_FRAME_DURATION_MS;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -220,7 +220,7 @@ public class AudioService {
     /**
      * 发送Opus帧数据
      */
-    private Mono<Void> sendOpusFrame(WebSocketSession session, byte[] opusFrame) {
+    public Mono<Void> sendOpusFrame(WebSocketSession session, byte[] opusFrame) {
         String sessionId = session.getId();
         
         try {

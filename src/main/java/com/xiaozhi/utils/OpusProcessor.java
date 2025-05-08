@@ -38,9 +38,9 @@ public class OpusProcessor {
     private static final int FRAME_SIZE = 960;
     private static final int SAMPLE_RATE = AudioUtils.SAMPLE_RATE;
     private static final int CHANNELS = AudioUtils.CHANNELS;
-    public static final int OPUS_FRAME_DURATION_MS = 60;
+    public static final int OPUS_FRAME_DURATION_MS = AudioUtils.OPUS_FRAME_DURATION_MS;
     private static final int MAX_SIZE = 1275;
-    
+
     // 预热帧数量 - 添加几个静音帧来预热编解码器
     private static final int PREWARM_FRAMES = 2;
 
@@ -526,7 +526,7 @@ public class OpusProcessor {
 
         // 每帧样本数
         int frameSize = (SAMPLE_RATE * OPUS_FRAME_DURATION_MS) / 1000;
-        
+
         // 确保frameSize与FRAME_SIZE一致
         if (frameSize != FRAME_SIZE) {
             frameSize = FRAME_SIZE; // 使用常量值
@@ -552,25 +552,25 @@ public class OpusProcessor {
 
         // 添加预热帧 - 渐入效果，解决开头破音问题
         addPrewarmFrames(frames, encoder, frameSize, opusBuf);
-        
+
         // 添加淡入效果到第一帧
         if (totalShorts > 0) {
             // 创建第一帧的拷贝，并应用淡入效果
             short[] firstFrameBuf = new short[frameSize];
             Arrays.fill(firstFrameBuf, (short) 0);
-            
+
             int firstFrameSamples = Math.min(frameSize, totalShorts);
             shorts.position(0);
             shorts.get(firstFrameBuf, 0, firstFrameSamples);
-            
+
             // 应用淡入效果 - 前20毫秒（大约320个样本）
             int fadeInSamples = Math.min(320, firstFrameSamples);
             for (int i = 0; i < fadeInSamples; i++) {
                 // 线性淡入
-                float gain = (float)i / fadeInSamples;
-                firstFrameBuf[i] = (short)(firstFrameBuf[i] * gain);
+                float gain = (float) i / fadeInSamples;
+                firstFrameBuf[i] = (short) (firstFrameBuf[i] * gain);
             }
-            
+
             try {
                 // 编码第一帧
                 int opusLen = encoder.encode(firstFrameBuf, 0, frameSize, opusBuf, 0, opusBuf.length);
@@ -582,28 +582,28 @@ public class OpusProcessor {
             } catch (OpusException e) {
                 logger.warn("淡入帧编码失败: {}", e.getMessage());
             }
-            
+
             // 从第二帧开始编码剩余的帧
             for (int i = 1; i < frameCount; i++) {
                 // 当前帧起始位置
                 int start = i * frameSize;
-                
+
                 // 当前帧样本数
                 int samples = Math.min(frameSize, totalShorts - start);
-                
+
                 // 重置缓冲区
                 Arrays.fill(shortBuf, (short) 0);
-                
+
                 // 读取样本
                 if (start < totalShorts) {
                     shorts.position(start);
                     int actual = Math.min(samples, shorts.remaining());
                     shorts.get(shortBuf, 0, actual);
-                    
+
                     try {
                         // 编码
                         int opusLen = encoder.encode(shortBuf, 0, frameSize, opusBuf, 0, opusBuf.length);
-                        
+
                         if (opusLen > 0) {
                             // 创建帧
                             byte[] frame = new byte[opusLen];
@@ -627,7 +627,7 @@ public class OpusProcessor {
         // 创建静音帧
         short[] silenceBuf = new short[frameSize];
         Arrays.fill(silenceBuf, (short) 0);
-        
+
         // 添加几个静音帧来预热编码器
         for (int i = 0; i < PREWARM_FRAMES; i++) {
             try {
@@ -674,13 +674,14 @@ public class OpusProcessor {
 
                 // 优化设置
                 encoder.setBitrate(AudioUtils.BITRATE);
+                // 这里后续看是不是要针对音乐做一个切换
                 encoder.setSignalType(OpusSignal.OPUS_SIGNAL_VOICE);
                 encoder.setComplexity(5); // 复杂度高音质好，低速度快
                 encoder.setPacketLossPercent(0); // 降低丢包补偿，减少处理延迟
                 encoder.setForceChannels(channels);
                 encoder.setUseVBR(false); // 使用CBR模式确保稳定的比特率
                 encoder.setUseDTX(false); // 禁用DTX以确保连续的帧
-                
+
                 return encoder;
             } catch (OpusException e) {
                 logger.error("创建编码器失败: 采样率={}, 通道={}", rate, channels, e);
