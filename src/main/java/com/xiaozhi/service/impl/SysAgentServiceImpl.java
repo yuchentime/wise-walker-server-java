@@ -91,8 +91,17 @@ public class SysAgentServiceImpl implements SysAgentService {
         if ("coze".equalsIgnoreCase(agent.getProvider())) {
             return getCozeAgents(agent);
         } else {
-            // 如果不是Coze平台，返回空列表
-            return Mono.just(new ArrayList<>());
+            // 如果不是Coze平台，返回其他Agent
+            List<SysAgent> agents = new ArrayList<>();
+            List<SysConfig> configs  = configMapper.query(agent);
+            for(SysConfig sysConfig : configs){
+                SysAgent sysAgent = new SysAgent();
+                sysAgent.setConfigId(sysConfig.getConfigId());
+                sysAgent.setProvider("DIFY");
+                sysAgent.setAgentName("DIFY");
+                agents.add(sysAgent);
+            }
+            return Mono.just(agents);
         }
     }
 

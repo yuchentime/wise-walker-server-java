@@ -121,6 +121,8 @@ export default {
       // 平台选项
       providerOptions: [
         { label: 'COZE', value: 'COZE' },
+        { label: 'dify', value: 'dify' },
+        { label: 'ollama', value: 'ollama' }
       ],
       // 表格列定义
       tableColumns: [
@@ -161,6 +163,8 @@ export default {
           placeholder: '请选择平台类型',
           options: [
             { label: 'COZE', value: 'COZE' },
+            { label: 'dify', value: 'dify' },
+            { label: 'Ollama', value: 'Ollama' }
           ]
         },
         {
@@ -173,7 +177,20 @@ export default {
           field: 'apiSecret',
           label: 'Secret token',
           placeholder: '请输入Secret token',
-        }
+          condition: { field: 'provider', value: 'COZE' }
+        },
+        {
+          field: 'apiUrl',
+          label: 'apiUrl',
+          placeholder: '请输入apiUrl',
+          condition: { field: 'provider', value: 'dify' }
+        },
+        {
+           field: 'apiKey',
+           label: 'apiKey',
+           placeholder: '请输入apiKey',
+           condition: { field: 'provider', value: 'dify' }
+        },
       ],
 
       // 平台表单验证规则
@@ -181,7 +198,9 @@ export default {
         provider: [{ required: true, message: '请选择平台类型', trigger: 'change' }],
         configName: [{ required: true, message: '请输入配置名称', trigger: 'blur' }],
         appId: [{ required: true, message: '请输入Space ID', trigger: 'blur' }],
-        apiSecret: [{ required: true, message: '请输入Secret token', trigger: 'blur' }]
+        apiSecret: [{ required: true, message: '请输入Secret token', trigger: 'blur' }],
+        apiUrl: [{ required: true, message: '请输入URL', trigger: 'blur' }],
+        apiKey: [{ required: true, message: '请输入apiKey', trigger: 'blur' }]
       }
     }
   },
@@ -347,3 +366,20 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.layout-content-margin {
+  margin: 24px;
+}
+
+.table-search {
+  margin-bottom: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.filter-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+</style>

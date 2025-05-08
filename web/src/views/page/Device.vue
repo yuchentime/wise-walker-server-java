@@ -318,6 +318,11 @@ export default {
               value: "coze",
               label: "Coze",
               children: []
+            },
+            {
+              value: "dify",
+              label: "Dify",
+              children: []
             }
           ]
         }
@@ -694,7 +699,7 @@ export default {
           .get({
             url: api.agent.query,
             data: {
-              provider: "coze",
+              provider: "dify",
             },
           })
           .then((res) => {
@@ -740,7 +745,7 @@ export default {
     // 处理级联选择器变更 - 修改为三级结构
     handleModelChange(value, deviceId) {
       if (!value || value.length < 3) return;
-      
+     
       const modelType = value[0]; // llm 或 agent
       const provider = value[1];  // 提供商
       const modelId = Number(value[2]); // 模型ID
@@ -824,13 +829,13 @@ export default {
 /* 使下拉框选项居中 */
 
 /* 确保下拉框中的文本居中 */
->>>.ant-select-selection__rendered .ant-select-selection-selected-value {
+.ant-select-selection__rendered .ant-select-selection-selected-value {
   text-align: center !important;
   width: 100% !important;
 }
 
 /* 查询框中的下拉框保持默认对齐方式 */
->>>.table-search .ant-select-selection-selected-value {
+.table-search .ant-select-selection-selected-value {
   text-align: left !important;
 }
 </style>
