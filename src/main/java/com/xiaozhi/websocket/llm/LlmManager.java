@@ -446,9 +446,7 @@ public class LlmManager {
      * 
      * @param deviceId 设备ID
      */
-    public void clearDeviceCache(String deviceId) {
-        deviceLlmServices.remove(deviceId);
-        deviceConfigIds.remove(deviceId);
+    public void clearMessageCache(String deviceId) {
         chatMemory.clearMessages(deviceId);
     }
 

@@ -136,6 +136,11 @@ public class SysDeviceServiceImpl implements SysDeviceService {
         return deviceMapper.query(device);
     }
 
+    @Override
+    public SysDevice selectDeviceById(String deviceId) {
+        return deviceMapper.selectDeviceById(deviceId);
+    }
+
     /**
      * 查询验证码
      */

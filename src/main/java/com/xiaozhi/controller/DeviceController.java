@@ -21,6 +21,7 @@ import com.xiaozhi.service.SysRoleService;
 import com.xiaozhi.utils.CmsUtils;
 import com.xiaozhi.websocket.service.SessionManager;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +122,7 @@ public class DeviceController {
             String sessionId = sessionManager.getSessionByDeviceId(deviceId);
 
             if (sessionId != null) {
+                SysDevice olDevice = sessionManager.getDeviceConfig(sessionId);
                 SysDevice updateDevice = device;
                 updateDevice.setSessionId(sessionId);
                 SysRole roleConfig = new SysRole();
@@ -135,6 +137,8 @@ public class DeviceController {
                     updateDevice.setSttId(device.getSttId());
                     if (device.getSttId() != -1) {
                         SysConfig sttConfig = configService.selectConfigById(device.getSttId());
+                        // 清空已缓存的配置信息
+                        sessionManager.removeConfig(olDevice.getSttId());
                         sessionManager.cacheConfig(sttConfig.getConfigId(), sttConfig);
                     }
                 }
@@ -142,10 +146,13 @@ public class DeviceController {
                     updateDevice.setTtsId(roleConfig.getTtsId());
                     if (device.getTtsId() != -1) {
                         SysConfig tssConfig = configService.selectConfigById(roleConfig.getTtsId());
+                        // 清空已缓存的配置信息
+                        sessionManager.removeConfig(olDevice.getTtsId());
                         sessionManager.cacheConfig(tssConfig.getConfigId(), tssConfig);
                         updateDevice.setVoiceName(roleConfig.getVoiceName());
                     }
                 }
+                // 更新配置信息
                 sessionManager.registerDevice(sessionId, updateDevice);
             }
         } catch (Exception e) {
@@ -325,8 +332,8 @@ public class DeviceController {
                         device.setLastLogin(new Date().toString());
 
                         // 查询设备是否已绑定
-                        return Mono.fromCallable(() -> deviceService.query(device))
-                                .flatMap(devices -> {
+                        return Mono.fromCallable(() -> deviceService.selectDeviceById(deviceId))
+                                .flatMap(queryDevice -> {
                                     Map<String, Object> responseData = new java.util.HashMap<>();
                                     Map<String, Object> firmwareData = new java.util.HashMap<>();
                                     Map<String, Object> serverTimeData = new java.util.HashMap<>();
@@ -353,7 +360,7 @@ public class DeviceController {
                                     websocketData.put("token", "");
 
                                     // 检查设备是否已绑定
-                                    if (devices.isEmpty()) {
+                                    if (ObjectUtils.isEmpty(device)) {
                                         // 设备未绑定，生成验证码
                                         try {
                                             SysDevice codeResult = deviceService.generateCode(device);
@@ -362,11 +369,6 @@ public class DeviceController {
                                             activationData.put("code", codeResult.getCode());
                                             activationData.put("message", codeResult.getCode());
                                             responseData.put("activation", activationData);
-
-                                            // 如果是新设备，更新设备信息
-                                            if (devices.isEmpty()) {
-                                                deviceService.update(device);
-                                            }
                                         } catch (Exception e) {
                                             logger.error("生成验证码失败", e);
                                             Map<String, Object> errorResponse = new java.util.HashMap<>();
@@ -375,7 +377,7 @@ public class DeviceController {
                                         }
                                     } else {
                                         // 设备已绑定，不需要返回activation字段
-                                        SysDevice boundDevice = devices.get(0);
+                                        SysDevice boundDevice = queryDevice;
 
                                         // 更新设备状态
                                         deviceService.update(

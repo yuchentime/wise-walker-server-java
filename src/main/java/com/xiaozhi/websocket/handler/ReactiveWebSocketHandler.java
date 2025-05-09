@@ -9,6 +9,8 @@ import com.xiaozhi.service.SysConfigService;
 import com.xiaozhi.service.SysDeviceService;
 import com.xiaozhi.websocket.service.*;
 import com.xiaozhi.websocket.tts.factory.TtsServiceFactory;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,20 +102,17 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
         final String deviceId = deviceIdAuth;
         return Mono.fromCallable(() -> {
             logger.info("开始查询设备信息 - DeviceId: {}", deviceId);
-            return deviceService.query(new SysDevice().setDeviceId(deviceId));
+            return deviceService.selectDeviceById(deviceId);
         })
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnError(e -> {
                     logger.error("查询设备信息失败 - DeviceId: " + deviceId, e);
                 })
-                .flatMap(devices -> {
-                    SysDevice device;
-                    if (devices.isEmpty()) {
-                        device = new SysDevice();
+                .flatMap(device -> {
+                    if (ObjectUtils.isEmpty(device)) {
                         device.setDeviceId(deviceId);
                         device.setSessionId(sessionId);
                     } else {
-                        device = devices.get(0);
                         device.setSessionId(sessionId);
                         if (device.getSttId() != null) {
                             SysConfig sttConfig = configService.selectConfigById(device.getSttId());
@@ -213,16 +212,16 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
                 // 只有在必要时才查询数据库
                 return Mono.fromCallable(
                         () -> deviceService
-                                .query(new SysDevice().setDeviceId(device.getDeviceId()).setSessionId(sessionId)))
+                                .selectDeviceById(device.getDeviceId()))
                         .subscribeOn(Schedulers.boundedElastic())
-                        .flatMap(deviceResult -> {
-                            if (deviceResult.isEmpty() ||
-                                    (deviceResult.get(0).getModelId() == null && device.getModelId() == null)) {
+                        .flatMap(queryDevice -> {
+                            if (ObjectUtils.isEmpty(queryDevice) ||
+                                    (queryDevice.getModelId() == null && device.getModelId() == null)) {
                                 // 设备未绑定，处理未绑定设备的消息
                                 return handleUnboundDevice(session, device);
                             } else {
                                 // 更新缓存的设备信息
-                                SysDevice updatedDevice = deviceResult.get(0);
+                                SysDevice updatedDevice = queryDevice;
                                 sessionManager.registerDevice(sessionId, updatedDevice);
 
                                 // 继续处理消息

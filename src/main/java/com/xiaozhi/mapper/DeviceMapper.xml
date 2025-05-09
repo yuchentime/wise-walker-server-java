@@ -44,6 +44,24 @@
             <if test="state != null and state != ''">AND sys_device.state = #{state}</if>
     </select>
 
+    <select id="selectDeviceById" resultType="com.xiaozhi.entity.SysDevice">
+        SELECT
+        <include refid="deviceSql"></include>,
+        <include refid="roleSql"></include>,
+        <include refid="modelSql"></include>,
+        <include refid="sttSql"></include>,
+        <include refid="ttsSql"></include>,
+        (SELECT COUNT(*) FROM sys_message WHERE sys_message.deviceId = sys_device.deviceId AND sys_message.state = '1') AS totalMessage
+        FROM
+            sys_device
+            LEFT JOIN sys_role ON sys_device.roleId = sys_role.roleId
+            LEFT JOIN sys_config model_config ON sys_device.modelId = model_config.configId AND model_config.configType = 'llm'
+            LEFT JOIN sys_config stt_config ON sys_device.sttId = stt_config.configId AND stt_config.configType = 'stt'
+            LEFT JOIN sys_config tts_config ON ttsId = tts_config.configId AND tts_config.configType = 'tts'
+        WHERE
+            deviceId = #{deviceId}
+    </select>
+
     <select id="queryVerifyCode" parameterType="com.xiaozhi.entity.SysDevice" resultType="com.xiaozhi.entity.SysDevice">
         SELECT
             code, audioPath, deviceId
