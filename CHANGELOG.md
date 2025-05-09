@@ -1,4 +1,14 @@
 # 变更日志
+## [2.7.44] - 2025-05-09
+
+### 修复
+- fix:改进 PR #75：修复dify逻辑错误问题
+
+### 其他变更
+- chore: update version to 2.7.44 [skip ci]
+- docs: update changelog for v2.7.43 [skip ci]
+- chore: update version to 2.7.43 [skip ci]
+
 ## [2.7.43] - 2025-05-08
 
 ### 其他变更
