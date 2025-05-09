@@ -147,10 +147,10 @@ public class SessionManager {
                 logger.error("关闭WebSocket会话时发生错误 - SessionId: {}", sessionId, e);
             }
         }
-        sessions.remove(sessionId);
-        SysDevice device = deviceConfigs.remove(sessionId);
-        listeningState.remove(sessionId);
-        streamingState.remove(sessionId);
+        sessions.remove(sessionId); // 清理session
+        deviceConfigs.remove(sessionId); // 清理设备配置
+        listeningState.remove(sessionId); // 清理监听状态
+        streamingState.remove(sessionId); // 清理播放状态
         lastActivityTime.remove(sessionId); // 清理活动时间记录
         iotDescriptors.remove(sessionId); // 清理Iot部件描述信息
         functionHolders.remove(sessionId);// 清理function_call tools
