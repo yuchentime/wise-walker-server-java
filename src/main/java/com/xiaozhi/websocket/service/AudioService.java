@@ -131,7 +131,6 @@ public class AudioService {
             String text,
             boolean isFirst,
             boolean isLast) {
-
         String sessionId = session.getId();
 
         // 标记开始播放
@@ -153,7 +152,6 @@ public class AudioService {
                 .then(Mono.fromCallable(() -> {
                     String fullPath = audioPath;
                     File audioFile = new File(fullPath);
-
                     if (!audioFile.exists()) {
                         logger.warn("音频文件不存在: {}", fullPath);
                         return null;
@@ -171,11 +169,12 @@ public class AudioService {
                         opusFrames = opusProcessor.pcmToOpus(
                                 session.getId(), audioData);
                     }
-
+                    
                     return opusFrames;
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(opusFrames -> {
+                    logger.debug("opusFrames is empty: {}",opusFrames == null || opusFrames.isEmpty());
                     if (opusFrames == null || opusFrames.isEmpty()) {
                         if (isLast) {
                             return sendStop(session);
@@ -183,7 +182,6 @@ public class AudioService {
                         isPlaying.get(sessionId).set(false);
                         return Mono.empty();
                     }
-
                     // 使用Flux.range创建一个发送序列
                     return Flux.range(0, opusFrames.size())
                             // 使用固定间隔发送帧
@@ -222,7 +220,6 @@ public class AudioService {
      */
     public Mono<Void> sendOpusFrame(WebSocketSession session, byte[] opusFrame) {
         String sessionId = session.getId();
-        
         try {
             // 直接发送原始Opus帧数据作为二进制消息
             WebSocketMessage wsMessage = session.binaryMessage(

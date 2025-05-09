@@ -41,7 +41,7 @@ public class LlmManager {
     private static final Pattern PAUSE_PATTERN = Pattern.compile("[，、；,;]");
 
     // 冒号和引号等特殊标点
-    private static final Pattern SPECIAL_PATTERN = Pattern.compile("[：:\"'']");
+    private static final Pattern SPECIAL_PATTERN = Pattern.compile("[：:\"]");
 
     // 换行符
     private static final Pattern NEWLINE_PATTERN = Pattern.compile("[\n\r]");

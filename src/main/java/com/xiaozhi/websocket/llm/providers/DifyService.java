@@ -1,30 +1,21 @@
 package com.xiaozhi.websocket.llm.providers;
 
-import com.coze.openapi.client.chat.CreateChatReq;
-import com.coze.openapi.client.chat.model.ChatEvent;
-import com.coze.openapi.client.chat.model.ChatEventType;
-import com.coze.openapi.client.chat.model.ChatToolCall;
-import com.coze.openapi.client.connversations.message.model.Message;
-import com.xiaozhi.entity.SysMessage;
 import com.xiaozhi.websocket.llm.api.AbstractLlmService;
 import com.xiaozhi.websocket.llm.api.StreamResponseListener;
 import com.xiaozhi.websocket.llm.memory.ModelContext;
-import com.xiaozhi.websocket.llm.tool.ActionType;
-import com.xiaozhi.websocket.llm.tool.ToolResponse;
 import io.github.imfangs.dify.client.DifyChatClient;
 import io.github.imfangs.dify.client.DifyClientFactory;
-import io.github.imfangs.dify.client.callback.ChatStreamCallback;
+import io.github.imfangs.dify.client.callback.ChatflowStreamCallback;
 import io.github.imfangs.dify.client.enums.ResponseMode;
 import io.github.imfangs.dify.client.event.*;
 import io.github.imfangs.dify.client.model.chat.ChatMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DifyService extends AbstractLlmService {
-    DifyChatClient chatClient;
+    private DifyChatClient chatClient;
 
     /**
      * 构造函数
@@ -39,8 +30,6 @@ public class DifyService extends AbstractLlmService {
         super(endpoint, appId, apiKey, apiSecret, model);
 
         chatClient = DifyClientFactory.createChatClient(endpoint, apiKey);
-
-        logger.info("初始化Dify服务 ", endpoint, apiKey);
     }
 
     @Override
@@ -67,16 +56,16 @@ public class DifyService extends AbstractLlmService {
                 .build();
 
         StringBuilder fullResponse = new StringBuilder();
-// 发送流式消息
-        chatClient.sendChatMessageStream(message, new ChatStreamCallback() {
+        // 发送流式消息
+        chatClient.sendChatMessageStream(message, new ChatflowStreamCallback() {
             @Override
             public void onMessage(MessageEvent event) {
-                logger.info("收到消息片段: {}", event.getAnswer());
+                fullResponse.append(event.getAnswer());
+                streamListener.onToken(event.getAnswer());
             }
 
             @Override
             public void onAgentMessage(AgentMessageEvent event) {
-                logger.info("onAgentMessage: {}", event.getAnswer());
                 fullResponse.append(event.getAnswer());
                 streamListener.onToken(event.getAnswer());
             }
@@ -93,7 +82,6 @@ public class DifyService extends AbstractLlmService {
 
             @Override
             public void onMessageEnd(MessageEndEvent event) {
-                logger.info("消息结束，完整消息ID: {}", event.getMessageId());
                 // 通知完成
                 streamListener.onComplete(fullResponse.toString());
                 streamListener.onFinal(messages, DifyService.this);
@@ -108,6 +96,47 @@ public class DifyService extends AbstractLlmService {
             public void onException(Throwable throwable) {
                 logger.error("异常: {}", throwable.getMessage());
                 streamListener.onError(new IOException(throwable));
+            }
+            
+            @Override
+            public void onWorkflowStarted(WorkflowStartedEvent event) {
+                logger.debug("工作流开始: {}", event);
+            }
+            
+            @Override
+            public void onNodeStarted(NodeStartedEvent event) {
+                logger.debug("节点开始: {}", event);
+            }
+            
+            @Override
+            public void onNodeFinished(NodeFinishedEvent event) {
+                logger.debug("节点完成: {}", event);
+            }
+            
+            @Override
+            public void onWorkflowFinished(WorkflowFinishedEvent event) {
+                logger.debug("工作流完成: {}", event);
+            }
+            
+            // 实现其他必要的回调方法
+            @Override
+            public void onMessageFile(MessageFileEvent event) {
+                logger.debug("消息文件: {}", event);
+            }
+            
+            @Override
+            public void onTTSMessageEnd(TtsMessageEndEvent event) {
+                logger.debug("TTS消息结束: {}", event);
+            }
+            
+            @Override
+            public void onAgentThought(AgentThoughtEvent event) {
+                logger.debug("代理思考: {}", event);
+            }
+            
+            @Override
+            public void onPing(PingEvent event) {
+                // 心跳事件，通常不需要特别处理
             }
         });
     }
