@@ -287,22 +287,22 @@ public class DeviceController {
                             }
                         }
 
-                        // 解析JSON请求体
-                        if (deviceIdAuth == null &&
-                                exchange.getRequest().getHeaders().getContentType() != null &&
-                                exchange.getRequest().getHeaders().getContentType().toString()
-                                        .contains("application/json")) {
-
+                        // 尝试解析请求体，无论Content-Type是什么
+                        try {
+                            // 首先尝试作为JSON解析
                             Map<String, Object> jsonData = objectMapper.readValue(requestBody,
                                     new TypeReference<Map<String, Object>>() {
                                     });
-
+                            
                             // 尝试从JSON中获取设备ID
                             if (jsonData.containsKey("mac_address")) {
                                 deviceIdAuth = (String) jsonData.get("mac_address");
                             }
                             if (deviceIdAuth == null && jsonData.containsKey("uuid")) {
                                 deviceIdAuth = (String) jsonData.get("uuid");
+                            }
+                            if (deviceIdAuth == null && jsonData.containsKey("device_id")) {
+                                deviceIdAuth = (String) jsonData.get("device_id");
                             }
 
                             // 提取chip_model_name
@@ -317,10 +317,30 @@ public class DeviceController {
                                     device.setVersion((String) application.get("version"));
                                 }
                             }
+                        } catch (Exception e) {
+                            
+                            // 如果不是JSON，尝试解析为表单数据或其他格式
+                            if (requestBody != null && !requestBody.isEmpty()) {
+                                logger.info("尝试解析为表单数据");
+                                String[] pairs = requestBody.split("&");
+                                for (String pair : pairs) {
+                                    String[] keyValue = pair.split("=");
+                                    if (keyValue.length == 2) {
+                                        String key = keyValue[0];
+                                        String value = keyValue[1];
+                                        logger.info("表单参数: {} = {}", key, value);
+                                        
+                                        if (deviceIdAuth == null && 
+                                            (key.equals("mac_address") || key.equals("uuid") || key.equals("device_id"))) {
+                                            deviceIdAuth = value;
+                                            logger.info("从表单数据中找到设备ID: {} = {}", key, value);
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         if (deviceIdAuth == null) {
-                            logger.error("设备ID为空");
                             // 直接返回错误信息，不使用AjaxResult包装
                             Map<String, Object> errorResponse = new java.util.HashMap<>();
                             errorResponse.put("error", "设备ID为空");
@@ -332,7 +352,7 @@ public class DeviceController {
                         device.setLastLogin(new Date().toString());
 
                         // 查询设备是否已绑定
-                        return Mono.fromCallable(() -> deviceService.selectDeviceById(deviceId))
+                        return Mono.fromCallable(() -> deviceService.query(device))
                                 .flatMap(queryDevice -> {
                                     Map<String, Object> responseData = new java.util.HashMap<>();
                                     Map<String, Object> firmwareData = new java.util.HashMap<>();
@@ -358,9 +378,8 @@ public class DeviceController {
                                     websocketData.put("url",
                                             "ws://" + serverIp + ":" + port + "/ws/xiaozhi/v1/");
                                     websocketData.put("token", "");
-
                                     // 检查设备是否已绑定
-                                    if (ObjectUtils.isEmpty(device)) {
+                                    if (ObjectUtils.isEmpty(queryDevice)) {
                                         // 设备未绑定，生成验证码
                                         try {
                                             SysDevice codeResult = deviceService.generateCode(device);
@@ -377,7 +396,7 @@ public class DeviceController {
                                         }
                                     } else {
                                         // 设备已绑定，不需要返回activation字段
-                                        SysDevice boundDevice = queryDevice;
+                                        SysDevice boundDevice = queryDevice.get(0);
 
                                         // 更新设备状态
                                         deviceService.update(
@@ -394,7 +413,6 @@ public class DeviceController {
                     } catch (Exception e) {
                         logger.error("处理OTA请求失败", e);
                         Map<String, Object> errorResponse = new java.util.HashMap<>();
-                        errorResponse.put("error", "处理OTA请求失败");
                         return Mono.just(errorResponse);
                     }
                 });
