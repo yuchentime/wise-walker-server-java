@@ -174,7 +174,6 @@ public class AudioService {
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(opusFrames -> {
-                    logger.debug("opusFrames is empty: {}",opusFrames == null || opusFrames.isEmpty());
                     if (opusFrames == null || opusFrames.isEmpty()) {
                         if (isLast) {
                             return sendStop(session);

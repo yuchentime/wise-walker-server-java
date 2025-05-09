@@ -10,7 +10,7 @@ import com.xiaozhi.service.SysDeviceService;
 import com.xiaozhi.websocket.service.*;
 import com.xiaozhi.websocket.tts.factory.TtsServiceFactory;
 
-import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
