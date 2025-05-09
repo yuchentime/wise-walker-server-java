@@ -169,7 +169,12 @@
             <artifactId>coze-api</artifactId>
             <version>LATEST</version>
         </dependency>
-
+        <!-- DIFY -->
+        <dependency>
+            <groupId>io.github.imfangs</groupId>
+            <artifactId>dify-java-client</artifactId>
+            <version>1.0.7</version>
+        </dependency>
     </dependencies>
 
     <build>
