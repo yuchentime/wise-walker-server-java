@@ -114,24 +114,34 @@ Xiaozhi ESP32 Server Java 是基于 [Xiaozhi ESP32](https://github.com/78/xiaozh
 ## UI 展示 🎨
 
 <div align="center">
-  <img src="docs/images/login.jpg" alt="登录界面" width="600" style="margin: 10px;" />
-  <p><strong>登录界面</strong> - 安全访问系统的入口</p>
-  
-  <img src="docs/images/dashboard.jpg" alt="仪表盘" width="600" style="margin: 10px;" />
-  <p><strong>仪表盘</strong> - 系统概览和关键数据展示</p>
-  
-  <img src="docs/images/device.jpg" alt="设备管理" width="600" style="margin: 10px;" />
-  <p><strong>设备管理</strong> - 全面管理和监控所有连接设备</p>
-  
-  <img src="docs/images/message.jpg" alt="消息记录" width="600" style="margin: 10px;" />
-  <p><strong>消息记录</strong> - 查看和搜索历史对话内容</p>
-  
-  <img src="docs/images/model.jpg" alt="模型管理" width="600" style="margin: 10px;" />
-  <p><strong>模型管理</strong> - 配置和管理AI模型</p>
-  
-  <img src="docs/images/role.jpg" alt="角色管理" width="600" style="margin: 10px;" />
-  <p><strong>角色管理</strong> - 设置和切换AI角色</p>
+    <img src="docs/images/device.jpg" alt="设备管理" width="600" style="margin: 10px;" />
+    <p><strong>设备管理</strong> - 全面管理和监控所有连接设备</p>
 </div>
+
+<details>
+  <summary style="cursor: pointer; font-size: 1.2em; color: #0366d6; text-align: center; display: block; margin: 20px 0; padding: 10px; background-color:rgb(48, 48, 48); border-radius: 5px;">
+    <strong>👉 点击查看更多界面截图 👈</strong>
+  </summary>
+  
+  <div align="center">
+    <img src="docs/images/login.jpg" alt="登录界面" width="600" style="margin: 10px;" />
+    <p><strong>登录界面</strong> - 安全访问系统的入口</p>
+    <img src="docs/images/dashboard.jpg" alt="仪表盘" width="600" style="margin: 10px;" />
+    <p><strong>仪表盘</strong> - 系统概览和关键数据展示</p>
+    <img src="docs/images/user.jpg" alt="用户管理" width="600" style="margin: 10px;" />
+    <p><strong>用户管理</strong> - 管理用户信息和权限</p>
+    <img src="docs/images/message.jpg" alt="消息记录" width="600" style="margin: 10px;" />
+    <p><strong>消息记录</strong> - 查看和搜索历史对话内容</p>
+    <img src="docs/images/model.jpg" alt="模型管理" width="600" style="margin: 10px;" />
+    <p><strong>模型管理</strong> - 配置和管理AI模型</p>
+    <img src="docs/images/agent.jpg" alt="智能体管理" width="600" style="margin: 10px;" />
+    <p><strong>智能体管理</strong> - 设置和切换智能体，Coze/Dify</p>
+    <img src="docs/images/role.jpg" alt="角色管理" width="600" style="margin: 10px;" />
+    <p><strong>角色管理</strong> - 设置和切换AI角色</p>
+    <img src="docs/images/voiceClone.jpg" alt="音色克隆" width="600" style="margin: 10px;" />
+    <p><strong>音色克隆</strong> - 克隆自己的声音，实现个性化语音助手</p>
+  </div>
+</details>
 
 ---
 
