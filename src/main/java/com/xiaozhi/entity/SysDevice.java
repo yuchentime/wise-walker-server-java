@@ -67,6 +67,11 @@ public class SysDevice extends SysRole {
     private String chipModelName;
 
     /**
+     * 芯片类型
+     */
+    private String type;
+
+    /**
      * 固件版本
      */
     private String version;
@@ -191,6 +196,15 @@ public class SysDevice extends SysRole {
 
     public SysDevice setChipModelName(String chipModelName) {
         this.chipModelName = chipModelName;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+    
+    public SysDevice setType(String type) {
+        this.type = type;
         return this;
     }
 

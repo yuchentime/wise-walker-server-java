@@ -272,6 +272,12 @@ export default {
           align: "center",
         },
         {
+          title: "设备类型",
+          dataIndex: "Type",
+          width: 100,
+          align: "center",
+        },
+        {
           title: "版本号",
           dataIndex: "version",
           width: 100,
