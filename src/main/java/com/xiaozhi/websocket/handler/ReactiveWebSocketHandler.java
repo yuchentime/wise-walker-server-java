@@ -261,6 +261,7 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
         if (device.getModelId() == null) {
             return handleUnboundDevice(session, device);
         }
+        sessionManager.updateLastActivity(session.getId());
         // 获取二进制数据
         DataBuffer dataBuffer = message.getPayload();
         DataBuffer retainedBuffer = DataBufferUtils.retain(dataBuffer);

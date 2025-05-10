@@ -89,7 +89,6 @@ public class AudioService {
         
         // 检查是否需要关闭会话
         if (sessionManager.isCloseAfterChat(sessionId)) {
-            logger.info("会话将在聊天后关闭 - SessionId: {}", sessionId);
             sessionManager.closeSession(sessionId);
             return Mono.empty();
         }
