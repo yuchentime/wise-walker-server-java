@@ -231,7 +231,7 @@ public class SysDevice extends SysRole {
                 + sttId + ", deviceName=" + deviceName + ", state=" + state + ", totalMessage="
                 + totalMessage + ", code=" + code + ", audioPath=" + audioPath + ", lastLogin=" + lastLogin
                 + ", wifiName=" + wifiName + ", ip=" + ip + ", chipModelName=" + chipModelName
-                + ", version=" + version + ", functionNames=" + functionNames
+                + ", version=" + version + ", functionNames=" + functionNames + ", type=" + type
                 + "]";
     }
 }

@@ -64,7 +64,7 @@
 
     <select id="queryVerifyCode" parameterType="com.xiaozhi.entity.SysDevice" resultType="com.xiaozhi.entity.SysDevice">
         SELECT
-            code, audioPath, deviceId
+            code, audioPath, deviceId, type
         FROM
             sys_code
         WHERE
@@ -92,8 +92,8 @@
         <selectKey keyProperty="code" order="BEFORE" resultType="java.lang.String">
             SELECT LPAD(FLOOR(RAND() * 1000000), 6, '0') as code
         </selectKey>
-        INSERT INTO sys_code (deviceId, sessionId, code, createTime)
-        VALUES (#{deviceId}, #{sessionId}, #{code}, NOW())
+        INSERT INTO sys_code (deviceId, sessionId, type, code, createTime)
+        VALUES (#{deviceId}, #{sessionId}, #{type}, #{code}, NOW())
     </insert>
 
     <update id="update" parameterType="com.xiaozhi.entity.SysDevice">

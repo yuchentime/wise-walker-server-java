@@ -1,6 +1,5 @@
 package com.xiaozhi.controller;
 
-import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +186,7 @@ public class DeviceController {
                             }
 
                             device.setDeviceId(query.getDeviceId());
-                            device.setDeviceName("小智");
+                            device.setDeviceName(query.getType().length() > 0 ? query.getType() : "小智");
                             int row = deviceService.add(device);
                             if (row > 0) {
                                 String deviceId = device.getDeviceId();
