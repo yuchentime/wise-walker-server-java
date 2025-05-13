@@ -417,67 +417,6 @@ public class LlmManager {
     }
 
     /**
-     * 更新对话音频关联
-     * 将用户和助手的消息内容与对应的音频路径关联并保存
-     * 
-     * @param sessionId          会话ID
-     * @param userMessage        用户消息内容
-     * @param assistantMessage   助手消息内容
-     * @param userAudioPath      用户音频路径
-     * @param assistantAudioPath 助手音频路径
-     */
-    public void updateDialogueAudio(String sessionId, String userMessage, String assistantMessage,
-            String userAudioPath, String assistantAudioPath) {
-        try {
-            String deviceId = null;
-            Integer roleId = null;
-
-            // 从会话中获取设备信息
-            SysDevice device = sessionManager.getDeviceConfig(sessionId);
-            if (device != null) {
-                deviceId = device.getDeviceId();
-                roleId = device.getRoleId();
-            }
-
-            if (deviceId == null || roleId == null) {
-                logger.warn("无法获取设备信息，无法保存对话音频关联 - SessionId: {}", sessionId);
-                return;
-            }
-
-            // 创建模型上下文
-            ModelContext modelContext = new ModelContext(
-                    deviceId,
-                    sessionId,
-                    roleId,
-                    chatMemory);
-
-            // 添加用户消息（带音频路径）
-            if (userMessage != null && !userMessage.isEmpty()) {
-                // 添加用户消息到聊天记忆，使用扩展的addMessage方法
-                chatMemory.addMessage(deviceId, sessionId, "user", userMessage, roleId, "NORMAL", userAudioPath);
-            }
-
-            // 添加助手消息（带音频路径）
-            if (assistantMessage != null && !assistantMessage.isEmpty()) {
-                // 添加助手消息到聊天记忆，使用扩展的addMessage方法
-                chatMemory.addMessage(deviceId, sessionId, "assistant", assistantMessage, roleId, "NORMAL",
-                        assistantAudioPath);
-            }
-
-            logger.info("对话音频关联已更新 - SessionId: {}, DeviceId: {}", sessionId, deviceId);
-            // 清理会话属性
-            String dialogueId = (String) sessionManager.getSessionAttribute(sessionId, "currentDialogueId");
-            if (dialogueId != null) {
-                sessionManager.removeSessionAttribute(sessionId, "userAudioPath_" + dialogueId);
-                sessionManager.removeSessionAttribute(sessionId, "assistantAudioPath_" + dialogueId);
-                sessionManager.removeSessionAttribute(sessionId, "userMessage_" + dialogueId);
-            }
-        } catch (Exception e) {
-            logger.error("更新对话音频关联失败 - SessionId: {}, 错误: {}", sessionId, e.getMessage(), e);
-        }
-    }
-
-    /**
      * 判断文本是否包含实质性内容（不仅仅是空白字符或标点符号）
      * 
      * @param text 要检查的文本
