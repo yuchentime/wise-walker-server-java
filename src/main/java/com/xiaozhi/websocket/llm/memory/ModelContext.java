@@ -14,6 +14,7 @@ public class ModelContext {
     private final String sessionId;
     private final Integer roleId;
     private final String systemMessage;
+    private final boolean useFunctionCall;// 是否启用函数调用
     private final ChatMemory chatMemory;
     private final FunctionSessionHolder functionSessionHolder;
 
@@ -23,13 +24,15 @@ public class ModelContext {
      * @param deviceId   设备ID
      * @param sessionId  会话ID
      * @param roleId     角色ID
+     * @param useFunctionCall     是否启用函数调用
      * @param chatMemory 聊天记忆
      */
-    public ModelContext(String deviceId, String sessionId, Integer roleId, ChatMemory chatMemory) {
+    public ModelContext(String deviceId, String sessionId, Integer roleId, boolean useFunctionCall, ChatMemory chatMemory) {
         this.deviceId = deviceId;
         this.sessionId = sessionId;
         this.roleId = roleId;
         this.chatMemory = chatMemory;
+        this.useFunctionCall = useFunctionCall;
         this.systemMessage = chatMemory.getSystemMessage(deviceId, roleId);
         this.functionSessionHolder = null;
     }
@@ -43,11 +46,12 @@ public class ModelContext {
      * @param chatMemory 聊天记忆
      * @param functionSessionHolder session绑定的function控制器
      */
-    public ModelContext(String deviceId, String sessionId, Integer roleId, ChatMemory chatMemory, FunctionSessionHolder functionSessionHolder) {
+    public ModelContext(String deviceId, String sessionId, Integer roleId, boolean useFunctionCall, ChatMemory chatMemory, FunctionSessionHolder functionSessionHolder) {
         this.deviceId = deviceId;
         this.sessionId = sessionId;
         this.roleId = roleId;
         this.chatMemory = chatMemory;
+        this.useFunctionCall = useFunctionCall;
         this.systemMessage = chatMemory.getSystemMessage(deviceId, roleId);
         this.functionSessionHolder = functionSessionHolder;
     }
@@ -77,6 +81,10 @@ public class ModelContext {
      */
     public Integer getRoleId() {
         return roleId;
+    }
+
+    public boolean isUseFunctionCall() {
+        return useFunctionCall;
     }
 
     /**

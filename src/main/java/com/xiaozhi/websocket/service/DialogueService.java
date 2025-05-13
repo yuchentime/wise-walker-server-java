@@ -307,7 +307,7 @@ public class DialogueService {
                             .then(audioService.sendStart(session))
                             .then(Mono.fromRunnable(() -> {
                                 // 使用句子切分处理响应
-                                llmManager.chatStreamBySentence(device, finalText,
+                                llmManager.chatStreamBySentence(device, finalText, true,
                                         (sentence, isFirst, isLast) -> {
                                             handleSentence(
                                                     session,
@@ -556,7 +556,7 @@ private void processQueue(WebSocketSession session, String sessionId) {
                 .then(audioService.sendStart(session)) // 立即发送TTS开始状态
                 .then(Mono.fromRunnable(() -> {
                     // 使用句子切分处理响应
-                    llmManager.chatStreamBySentence(device, text,
+                    llmManager.chatStreamBySentence(device, text,true,
                             (sentence, isFirst, isLast) -> {
                                 handleSentence(
                                         session,
