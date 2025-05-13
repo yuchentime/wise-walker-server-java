@@ -94,7 +94,7 @@ public class ModelContext {
      * @param message 用户消息
      */
     public void addUserMessage(String message) {
-        chatMemory.addMessage(deviceId, sessionId, "user", message, roleId, "NORMAL");
+        chatMemory.addMessage(deviceId, sessionId, "user", message, roleId, "NORMAL", null);
     }
 
     /**
@@ -103,7 +103,7 @@ public class ModelContext {
      * @param message AI消息
      */
     public void addAssistantMessage(String message) {
-        chatMemory.addMessage(deviceId, sessionId, "assistant", message, roleId, "NORMAL");
+        chatMemory.addMessage(deviceId, sessionId, "assistant", message, roleId, "NORMAL", null);
     }
 
     /**
@@ -113,8 +113,8 @@ public class ModelContext {
      * @param role 角色名称
      * @param messageType 消息类型
      */
-    public void addMessage(String message, String role, String messageType) {
-        chatMemory.addMessage(deviceId, sessionId, role, message, roleId, messageType);
+    public void addMessage(String message, String role, String messageType, String audioPath) {
+        chatMemory.addMessage(deviceId, sessionId, role, message, roleId, messageType, audioPath);
     }
 
     /**

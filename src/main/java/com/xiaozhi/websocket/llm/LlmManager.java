@@ -339,6 +339,10 @@ public class LlmManager {
                     List<Map<String, Object>> newMessages = new ArrayList<>();
                     // 如果本轮对话是function_all或mcp调用(最后一条信息的类型)，把用户的消息类型也修正为同样类型
                     String lastMessageType = allMessages.get(allMessages.size() - 1).get("messageType").toString();
+                    // 获取当前对话ID
+                    String dialogueId = (String) sessionManager.getSessionAttribute(modelContext.getSessionId(),
+                            "currentDialogueId");
+
                     // 遍历allMessages，将未保存的user及assistant入库
                     allMessages.forEach(message -> {
                         Object messageId = message.get("messageId");
@@ -351,7 +355,18 @@ public class LlmManager {
                                     : String.valueOf(message.get("content"));
                             if (!"tool".equals(role) && !messageContent.isEmpty()
                                     && !message.containsKey("messageId")) {// 非空未入库消息，则进行入库
-                                modelContext.addMessage(messageContent, role, lastMessageType);
+                                // 获取音频路径
+                                String audioPath = null;
+                                if (dialogueId != null) {
+                                    if ("user".equals(role)) {
+                                        audioPath = (String) sessionManager.getSessionAttribute(
+                                                modelContext.getSessionId(), "userAudioPath_" + dialogueId);
+                                    } else if ("assistant".equals(role)) {
+                                        audioPath = (String) sessionManager.getSessionAttribute(
+                                                modelContext.getSessionId(), "assistantAudioPath_" + dialogueId);
+                                    }
+                                }
+                                modelContext.addMessage(messageContent, role, lastMessageType, audioPath);
                                 // 数据入库后，给个id，避免下次再被入库
                                 message.put("messageId", 0);
                                 message.put("messageType", lastMessageType);
@@ -388,6 +403,67 @@ public class LlmManager {
 
             // 清除会话完成标志
             sessionCompletionFlags.remove(device.getSessionId());
+        }
+    }
+
+    /**
+     * 更新对话音频关联
+     * 将用户和助手的消息内容与对应的音频路径关联并保存
+     * 
+     * @param sessionId          会话ID
+     * @param userMessage        用户消息内容
+     * @param assistantMessage   助手消息内容
+     * @param userAudioPath      用户音频路径
+     * @param assistantAudioPath 助手音频路径
+     */
+    public void updateDialogueAudio(String sessionId, String userMessage, String assistantMessage,
+            String userAudioPath, String assistantAudioPath) {
+        try {
+            String deviceId = null;
+            Integer roleId = null;
+
+            // 从会话中获取设备信息
+            SysDevice device = sessionManager.getDeviceConfig(sessionId);
+            if (device != null) {
+                deviceId = device.getDeviceId();
+                roleId = device.getRoleId();
+            }
+
+            if (deviceId == null || roleId == null) {
+                logger.warn("无法获取设备信息，无法保存对话音频关联 - SessionId: {}", sessionId);
+                return;
+            }
+
+            // 创建模型上下文
+            ModelContext modelContext = new ModelContext(
+                    deviceId,
+                    sessionId,
+                    roleId,
+                    chatMemory);
+
+            // 添加用户消息（带音频路径）
+            if (userMessage != null && !userMessage.isEmpty()) {
+                // 添加用户消息到聊天记忆，使用扩展的addMessage方法
+                chatMemory.addMessage(deviceId, sessionId, "user", userMessage, roleId, "NORMAL", userAudioPath);
+            }
+
+            // 添加助手消息（带音频路径）
+            if (assistantMessage != null && !assistantMessage.isEmpty()) {
+                // 添加助手消息到聊天记忆，使用扩展的addMessage方法
+                chatMemory.addMessage(deviceId, sessionId, "assistant", assistantMessage, roleId, "NORMAL",
+                        assistantAudioPath);
+            }
+
+            logger.info("对话音频关联已更新 - SessionId: {}, DeviceId: {}", sessionId, deviceId);
+            // 清理会话属性
+            String dialogueId = (String) sessionManager.getSessionAttribute(sessionId, "currentDialogueId");
+            if (dialogueId != null) {
+                sessionManager.removeSessionAttribute(sessionId, "userAudioPath_" + dialogueId);
+                sessionManager.removeSessionAttribute(sessionId, "assistantAudioPath_" + dialogueId);
+                sessionManager.removeSessionAttribute(sessionId, "userMessage_" + dialogueId);
+            }
+        } catch (Exception e) {
+            logger.error("更新对话音频关联失败 - SessionId: {}, 错误: {}", sessionId, e.getMessage(), e);
         }
     }
 

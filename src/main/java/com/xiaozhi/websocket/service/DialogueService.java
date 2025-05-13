@@ -2,6 +2,7 @@ package com.xiaozhi.websocket.service;
 
 import com.xiaozhi.entity.SysConfig;
 import com.xiaozhi.entity.SysDevice;
+import com.xiaozhi.utils.AudioUtils;
 import com.xiaozhi.utils.EmojiUtils;
 import com.xiaozhi.utils.EmojiUtils.EmoSentence;
 import com.xiaozhi.websocket.llm.LlmManager;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
@@ -79,6 +81,8 @@ public class DialogueService {
         private long timestamp = System.currentTimeMillis();
         private double modelResponseTime = 0.0; // 模型响应时间（秒）
         private double ttsGenerationTime = 0.0; // TTS生成时间（秒）
+        private String dialogueId = null; // 对话ID
+
 
         public Sentence(int seq, String text, boolean isFirst, boolean isLast) {
             this.seq = seq;
@@ -134,6 +138,14 @@ public class DialogueService {
 
         public double getTtsGenerationTime() {
             return ttsGenerationTime;
+        }
+
+        public void setDialogueId(String dialogueId) {
+            this.dialogueId = dialogueId;
+        }
+
+        public String getDialogueId() {
+            return dialogueId;
         }
     }
 
@@ -245,6 +257,10 @@ public class DialogueService {
         }
 
         final SysConfig finalTtsConfig = ttsConfig;
+        
+        // 为当前对话生成唯一ID
+        final String dialogueId = sessionId + "_" + System.currentTimeMillis();
+        sessionManager.setSessionAttribute(sessionId, "currentDialogueId", dialogueId);
 
         // 启动流式识别
         sttService.streamRecognition(audioSink.asFlux())
@@ -261,9 +277,34 @@ public class DialogueService {
                     // 设置会话为非监听状态，防止处理自己的声音
                     sessionManager.setListeningState(sessionId, false);
 
-                    // 发送最终识别结果，并立即发送TTS开始状态
-                    return messageService.sendMessage(session, "stt", "final", finalText)
-                            .then(audioService.sendStart(session)) // 立即发送TTS开始状态
+                    // 获取完整的音频数据并保存
+                    return Mono.fromCallable(() -> {
+                        // 获取完整的PCM数据
+                        List<byte[]> pcmFrames = vadService.getProcessedAudioData(sessionId);
+                        String userAudioPath = null;
+                        
+                        if (pcmFrames != null && !pcmFrames.isEmpty()) {
+                            // 合并PCM帧
+                            int totalSize = pcmFrames.stream().mapToInt(frame -> frame.length).sum();
+                            byte[] fullPcmData = new byte[totalSize];
+                            int offset = 0;
+                            for (byte[] frame : pcmFrames) {
+                                System.arraycopy(frame, 0, fullPcmData, offset, frame.length);
+                                offset += frame.length;
+                            }
+
+                            // 保存完整的PCM数据
+                            userAudioPath = AudioUtils.AUDIO_PATH + AudioUtils.saveAsWav(fullPcmData);
+                            
+                            // 将用户音频路径存储在会话属性中，使用对话ID作为键的一部分
+                            sessionManager.setSessionAttribute(sessionId, "userAudioPath_" + dialogueId, userAudioPath);
+                        }
+                        
+                        return finalText;
+                    })
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .flatMap(text -> messageService.sendMessage(session, "stt", "final", text)
+                            .then(audioService.sendStart(session))
                             .then(Mono.fromRunnable(() -> {
                                 // 使用句子切分处理响应
                                 llmManager.chatStreamBySentence(device, finalText,
@@ -275,15 +316,11 @@ public class DialogueService {
                                                     isFirst,
                                                     isLast,
                                                     finalTtsConfig,
-                                                    device.getVoiceName());
+                                                    device.getVoiceName(),
+                                                    dialogueId);  // 传递对话ID
                                         });
-                            }));
-                })
-                .onErrorResume(error -> {
-                    logger.error("流式识别错误: {}", error.getMessage(), error);
-                    return Mono.empty();
-                })
-                .subscribe();
+                            })));
+                }).subscribe();
 
         return Mono.empty();
     }
@@ -309,7 +346,8 @@ public class DialogueService {
             boolean isFirst,
             boolean isLast,
             SysConfig ttsConfig,
-            String voiceName) {
+            String voiceName,
+            String dialogueId) {  // 添加对话ID参数
 
         // 获取句子序列号
         int seq = seqCounters.get(sessionId).incrementAndGet();
@@ -331,6 +369,7 @@ public class DialogueService {
         // 创建句子对象
         Sentence sentence = new Sentence(seq, text, isFirst, isLast);
         sentence.setModelResponseTime(responseTime); // 记录模型响应时间
+        sentence.setDialogueId(dialogueId); // 设置对话ID
 
         // 添加到句子队列
         CopyOnWriteArrayList<Sentence> queue = sentenceQueue.get(sessionId);
@@ -361,12 +400,17 @@ public class DialogueService {
                 sentence.setTtsGenerationTime(ttsGenerationTime);
 
                 // 记录日志
-                logger.info("句子音频生成完成 - 序号: {}, 模型响应: {}秒, 语音生成: {}秒, 内容: \"{}\"",
-                        seq, df.format(sentence.getModelResponseTime()),
+                logger.info("句子音频生成完成 - 序号: {}, 对话ID: {}, 模型响应: {}秒, 语音生成: {}秒, 内容: \"{}\"",
+                        seq, dialogueId, df.format(sentence.getModelResponseTime()),
                         df.format(sentence.getTtsGenerationTime()), text);
 
                 // 标记音频准备就绪
                 sentence.setAudio(audioPath);
+                
+                // 如果是最后一个句子，存储助手的完整音频路径
+                if (isLast && audioPath != null) {
+                    sessionManager.setSessionAttribute(sessionId, "assistantAudioPath_" + dialogueId, audioPath);
+                }
 
                 // 尝试处理队列
                 processQueue(session, sessionId);
@@ -383,89 +427,89 @@ public class DialogueService {
     }
 
     /**
-     * 处理音频队列
-     * 在音频生成完成后调用
-     */
-    private void processQueue(WebSocketSession session, String sessionId) {
-        // 获取锁，确保线程安全
-        ReentrantLock lock = locks.get(sessionId);
-        if (lock == null) {
+ * 处理音频队列
+ * 在音频生成完成后调用
+ */
+private void processQueue(WebSocketSession session, String sessionId) {
+    // 获取锁，确保线程安全
+    ReentrantLock lock = locks.get(sessionId);
+    if (lock == null) {
+        return;
+    }
+
+    // 尝试获取锁，避免多线程同时处理
+    if (!lock.tryLock()) {
+        return;
+    }
+
+    try {
+        // 获取句子队列
+        CopyOnWriteArrayList<Sentence> queue = sentenceQueue.get(sessionId);
+        if (queue == null || queue.isEmpty()) {
             return;
         }
 
-        // 尝试获取锁，避免多线程同时处理
-        if (!lock.tryLock()) {
+        // 检查当前是否有句子正在播放
+        boolean isCurrentlyPlaying = audioService.isPlaying(sessionId);
+
+        if (isCurrentlyPlaying) {
             return;
         }
 
-        try {
-            // 获取句子队列
-            CopyOnWriteArrayList<Sentence> queue = sentenceQueue.get(sessionId);
-            if (queue == null || queue.isEmpty()) {
-                return;
+        // 找出最小序号
+        int minSeq = Integer.MAX_VALUE;
+        for (Sentence s : queue) {
+            if (s.getSeq() < minSeq) {
+                minSeq = s.getSeq();
             }
+        }
 
-            // 检查当前是否有句子正在播放
-            boolean isCurrentlyPlaying = audioService.isPlaying(sessionId);
-
-            if (isCurrentlyPlaying) {
-                return;
-            }
-
-            // 找出最小序号
-            int minSeq = Integer.MAX_VALUE;
-            for (Sentence s : queue) {
-                if (s.getSeq() < minSeq) {
-                    minSeq = s.getSeq();
+        // 找出该序号的句子
+        Sentence nextSentence = null;
+        for (Sentence s : queue) {
+            if (s.getSeq() == minSeq) {
+                // 检查句子是否准备好或超时
+                if (s.isReady()) {
+                    nextSentence = s;
+                } else if (s.isTimeout()) {
+                    // 如果句子超时，标记为准备好但没有音频
+                    s.setAudio(null);
+                    nextSentence = s;
                 }
+                break;
             }
+        }
 
-            // 找出该序号的句子
-            Sentence nextSentence = null;
-            for (Sentence s : queue) {
-                if (s.getSeq() == minSeq) {
-                    // 检查句子是否准备好或超时
-                    if (s.isReady()) {
-                        nextSentence = s;
-                    } else if (s.isTimeout()) {
-                        // 如果句子超时，标记为准备好但没有音频
-                        s.setAudio(null);
-                        nextSentence = s;
-                    }
-                    break;
-                }
-            }
+        if (nextSentence != null) {
+            final Sentence sentenceToProcess = nextSentence;
 
-            if (nextSentence != null) {
-                final Sentence sentenceToProcess = nextSentence;
-
-                // 发送到客户端
-                audioService.sendAudioMessage(
-                        session,
-                        sentenceToProcess.getAudioPath(),
-                        sentenceToProcess.getText(),
-                        sentenceToProcess.isFirst(), // 是否是第一句
-                        sentenceToProcess.isLast() // 是否是最后一句
-                ).subscribe(
-                        null,
-                        error -> {
-                            // 移除已处理的句子，即使失败也移除
-                            queue.remove(sentenceToProcess);
-                            // 递归调用，尝试处理下一个句子
-                            processQueue(session, sessionId);
-                        },
-                        () -> {
-                            // 从队列中移除已处理的句子
-                            queue.remove(sentenceToProcess);
+            // 发送到客户端
+            audioService.sendAudioMessage(
+                    session,
+                    sentenceToProcess.getAudioPath(),
+                    sentenceToProcess.getText(),
+                    sentenceToProcess.isFirst(), // 是否是第一句
+                    sentenceToProcess.isLast() // 是否是最后一句
+            ).subscribe(
+                    null,
+                    error -> {
+                        // 移除已处理的句子，即使失败也移除
+                        queue.remove(sentenceToProcess);
+                        // 递归调用，尝试处理下一个句子
+                        processQueue(session, sessionId);
+                    },
+                    () -> {
+                        // 从队列中移除已处理的句子
+                        queue.remove(sentenceToProcess);
 
                             // 如果队列为空且是最后一句，重置监听状态
                             if (queue.isEmpty() && sentenceToProcess.isLast()) {
                                 sessionManager.setListeningState(sessionId, true);
-                            } else {
-                                // 递归调用，尝试处理下一个句子
-                                processQueue(session, sessionId);
-                            }
-                        });
+                        } else {
+                            // 递归调用，尝试处理下一个句子
+                            processQueue(session, sessionId);
+                        }
+                    });
             } else {
                 // 如果队列为空，重置监听状态
                 if (queue.isEmpty()) {
@@ -500,6 +544,13 @@ public class DialogueService {
         // 设置为非监听状态，防止处理自己的声音
         sessionManager.setListeningState(sessionId, false);
 
+        // 为当前对话生成唯一ID
+        final String dialogueId = sessionId + "_" + System.currentTimeMillis();
+        sessionManager.setSessionAttribute(sessionId, "currentDialogueId", dialogueId);
+        
+        // 保存用户消息内容（唤醒词）
+        sessionManager.setSessionAttribute(sessionId, "userMessage_" + dialogueId, text);
+
         // 发送识别结果
         return messageService.sendMessage(session, "stt", "start", text)
                 .then(audioService.sendStart(session)) // 立即发送TTS开始状态
@@ -514,7 +565,8 @@ public class DialogueService {
                                         isFirst,
                                         isLast,
                                         ttsConfig,
-                                        device.getVoiceName());
+                                        device.getVoiceName(),
+                                        dialogueId);
                             });
                 }).then());
     }
@@ -533,7 +585,7 @@ public class DialogueService {
         // 清空句子队列
         CopyOnWriteArrayList<Sentence> queue = sentenceQueue.get(sessionId);
         if (queue != null) {
-            queue.clear();
+                queue.clear();
         }
 
         // 重新设置监听状态

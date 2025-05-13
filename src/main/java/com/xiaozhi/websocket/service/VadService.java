@@ -92,6 +92,9 @@ public class VadService {
         private final LinkedList<byte[]> preBuffer = new LinkedList<>();
         private int preBufferSize = 0; // 当前缓冲区大小（字节）
         private final int maxPreBufferSize; // 最大缓冲区大小（字节）
+        
+        // 添加用于存储处理过的音频帧的列表
+        private final List<byte[]> processedAudioFrames = new ArrayList<>();
 
         public VadSessionState() {
             // 计算预缓冲区大小（16kHz, 16bit, mono = 32 bytes/ms）
@@ -209,6 +212,23 @@ public class VadService {
 
             return result;
         }
+        
+        /**
+         * 添加处理后的音频帧
+         */
+        public void addProcessedAudioFrame(byte[] processedPcm) {
+            if (processedPcm != null && processedPcm.length > 0) {
+                // 使用clone避免外部修改影响存储的数据
+                processedAudioFrames.add(processedPcm.clone());
+            }
+        }
+
+        /**
+         * 获取所有处理过的音频帧
+         */
+        public List<byte[]> getProcessedAudioFrames() {
+            return new ArrayList<>(processedAudioFrames);
+        }
 
         /**
          * 重置状态
@@ -221,6 +241,7 @@ public class VadService {
             probabilities.clear();
             preBuffer.clear();
             preBufferSize = 0;
+            processedAudioFrames.clear(); // 清空音频帧
         }
     }
 
@@ -290,6 +311,7 @@ public class VadService {
                 state.updateSilenceState(isSilence);
 
                 if (!state.isSpeaking() && isSpeech) {
+                    state.processedAudioFrames.clear();
                     // 检测到语音开始
                     state.setSpeaking(true);
                     logger.info("检测到语音开始 - SessionId: {}, 概率: {}, 能量: {}", sessionId, speechProb, currentEnergy);
@@ -304,8 +326,13 @@ public class VadService {
                         System.arraycopy(preBufferData, 0, combinedData, 0, preBufferData.length);
                         System.arraycopy(processedPcm, 0, combinedData, preBufferData.length, processedPcm.length);
                         logger.debug("添加了{}字节的预缓冲音频 (约{}ms)", preBufferData.length, preBufferData.length / 32);
+                        
+                        // 保存预缓冲区和当前处理后的PCM数据
+                        state.addProcessedAudioFrame(combinedData);
                     } else {
                         combinedData = processedPcm;
+                        // 保存当前处理后的PCM数据
+                        state.addProcessedAudioFrame(processedPcm);
                     }
 
                     return new VadResult(VadStatus.SPEECH_START, combinedData);
@@ -319,10 +346,14 @@ public class VadService {
                         return new VadResult(VadStatus.SPEECH_END, processedPcm);
                     } else {
                         // 静音但未达到结束阈值，仍然视为语音继续
+                        // 保存处理后的PCM数据
+                        state.addProcessedAudioFrame(processedPcm);
                         return new VadResult(VadStatus.SPEECH_CONTINUE, processedPcm);
                     }
                 } else if (state.isSpeaking()) {
                     // 语音继续
+                    // 保存处理后的PCM数据
+                    state.addProcessedAudioFrame(processedPcm);
                     return new VadResult(VadStatus.SPEECH_CONTINUE, processedPcm);
                 } else {
                     // 没有检测到语音
@@ -477,6 +508,22 @@ public class VadService {
                 return state.getLastProbability();
             }
             return 0.0f;
+        }
+    }
+
+    /**
+     * 获取处理过的音频数据
+     * @param sessionId 会话ID
+     * @return 处理过的PCM音频数据列表
+     */
+    public List<byte[]> getProcessedAudioData(String sessionId) {
+        Object lock = getSessionLock(sessionId);
+        synchronized (lock) {
+            VadSessionState state = sessionStates.get(sessionId);
+            if (state != null) {
+                return state.getProcessedAudioFrames();
+            }
+            return new ArrayList<>();
         }
     }
 
