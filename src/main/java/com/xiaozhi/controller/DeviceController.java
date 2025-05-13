@@ -339,13 +339,9 @@ public class DeviceController {
                                     int port = Integer.parseInt(portStr);
 
                                     // 设置WebSocket连接信息
-                                    // websocketData.put("url",
-                                    //         "ws://" + serverIp + ":" + port + "/ws/xiaozhi/v1/");
-                                    websocketData.put("token", "");
-
-                                    
                                     websocketData.put("url",
-                                            "ws://192.168.31.130:8091/ws/xiaozhi/v1/");
+                                            "ws://" + serverIp + ":" + port + "/ws/xiaozhi/v1/");
+                                    websocketData.put("token", "");
                                     
                                     // 检查设备是否已绑定
                                     if (ObjectUtils.isEmpty(queryDevice)) {
