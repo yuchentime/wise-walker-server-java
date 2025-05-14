@@ -291,22 +291,19 @@ export default {
       ttsConfigs: [], // 存储TTS配置列表
       ttsConfigLoading: false, // TTS配置加载状态
       selectedTtsId: null, // 当前选择的TTS配置ID
-      // 缓存
-      cachedTtsConfigs: {}, // 缓存TTS配置
-      cachedVoices: {}, // 缓存语音列表
       promptTemplates: [], // 提示词模板列表
     }
   },
   mounted() {
     this.loadEdgeVoices();
-      
     this.loadAliyunVoices();
-        
     this.loadVolcengineVoices();
 
-    this.getData()
+    this.getData();
+
     // 初始化设置Edge默认TTS配置
     this.selectedTtsId = "edge_default";
+
     // 加载提示词模板列表
     this.loadTemplates();
   },
@@ -428,9 +425,6 @@ export default {
       this.ttsConfigs = [];
       this.selectedTtsId = null;
 
-      // 根据提供商加载语音列表（使用缓存或重新加载）
-      this.loadVoicesByProvider(value);
-
       // 根据提供商设置TTS配置
       if (value === 'edge') {
         // 为Edge提供默认配置
@@ -442,25 +436,8 @@ export default {
           });
         });
       } else {
-        // 检查是否有缓存的TTS配置
-        if (this.cachedTtsConfigs[value]) {
-          // 使用缓存的配置
-          this.ttsConfigs = this.cachedTtsConfigs[value];
-          if (this.ttsConfigs.length > 0) {
-            this.selectedTtsId = this.ttsConfigs[0].configId;
-            this.$nextTick(() => {
-              this.roleForm.setFieldsValue({
-                ttsId: this.selectedTtsId
-              });
-            });
-          } else {
-            this.$message.warning(`没有找到可用的 ${value} 语音合成配置，请先在语音合成配置中添加`);
-            this.selectedTtsId = null;
-          }
-        } else {
-          // 加载TTS配置
-          this.loadTtsConfigs(value);
-        }
+        // 加载TTS配置
+        this.loadTtsConfigs(value);
       }
 
       // 重置性别选择
@@ -468,40 +445,15 @@ export default {
       this.roleForm.setFieldsValue({
         gender: ''
       });
-    },
-
-    // 根据提供商加载语音列表
-    loadVoicesByProvider(provider) {
-      // 检查是否有缓存的语音列表
-      if (this.cachedVoices[provider] && this.cachedVoices[provider].length > 0) {
-        // 使用缓存的语音列表
-        if (provider === 'edge') {
-          this.edgeVoices = this.cachedVoices[provider];
-        } else if (provider === 'aliyun') {
-          this.aliyunVoices = this.cachedVoices[provider];
-        } else if (provider === 'volcengine') {
-          this.volcengineVoices = this.cachedVoices[provider];
+      
+      // 在下一个渲染循环更新语音名称选择
+      this.$nextTick(() => {
+        if (this.filteredVoices && this.filteredVoices.length > 0) {
+          this.roleForm.setFieldsValue({
+            voiceName: this.filteredVoices[0].value
+          });
         }
-
-        // 在设置完语音列表后，更新默认语音选择
-        this.$nextTick(() => {
-          if (this.filteredVoices && this.filteredVoices.length > 0) {
-            this.roleForm.setFieldsValue({
-              voiceName: this.filteredVoices[0].value
-            });
-          }
-        });
-        return;
-      }
-
-      // 没有缓存，需要加载语音列表
-      if (provider === 'edge' && this.edgeVoices.length === 0) {
-        this.loadEdgeVoices();
-      } else if (provider === 'aliyun' && this.aliyunVoices.length === 0) {
-        this.loadAliyunVoices();
-      } else if (provider === 'volcengine' && this.volcengineVoices.length === 0) {
-        this.loadVolcengineVoices();
-      }
+      });
     },
 
     // 处理TTS配置选择变化
@@ -535,9 +487,6 @@ export default {
         .then(res => {
           if (res.code === 200) {
             const configList = res.data.list || [];
-            
-            // 缓存配置
-            this.cachedTtsConfigs[provider] = configList;
             this.ttsConfigs = configList;
             
             // 如果有配置，默认选择第一个
@@ -645,11 +594,10 @@ export default {
               };
             });
 
-          // 缓存语音列表
-          this.cachedVoices['edge'] = voices;
+          // 保存语音列表
           this.edgeVoices = voices;
 
-          // 加载完语音列表后，设置默认语音
+          // 加载完语音列表后，如果当前选择的是Edge，设置默认语音
           this.$nextTick(() => {
             if (this.selectedProvider === 'edge' && this.edgeVoices.length > 0 && this.activeTabKey === '2') {
               this.roleForm.setFieldsValue({
@@ -679,11 +627,10 @@ export default {
           return response.json();
         })
         .then(voices => {
-          // 缓存语音列表
-          this.cachedVoices['aliyun'] = voices;
+          // 保存语音列表
           this.aliyunVoices = voices;
 
-          // 加载完语音列表后，设置默认语音
+          // 加载完语音列表后，如果当前选择的是阿里云，设置默认语音
           this.$nextTick(() => {
             if (this.selectedProvider === 'aliyun' && this.aliyunVoices.length > 0 && this.activeTabKey === '2') {
               this.roleForm.setFieldsValue({
@@ -713,11 +660,10 @@ export default {
           return response.json();
         })
         .then(voices => {
-          // 缓存语音列表
-          this.cachedVoices['volcengine'] = voices;
+          // 保存语音列表
           this.volcengineVoices = voices;
 
-          // 加载完语音列表后，设置默认语音
+          // 加载完语音列表后，如果当前选择的是火山引擎，设置默认语音
           this.$nextTick(() => {
             if (this.selectedProvider === 'volcengine' && this.volcengineVoices.length > 0 && this.activeTabKey === '2') {
               this.roleForm.setFieldsValue({
@@ -802,9 +748,6 @@ export default {
 
         // 设置语音提供商
         this.selectedProvider = record.provider || 'edge';
-        
-        // 确保相应的语音列表已加载
-        this.loadVoicesByProvider(this.selectedProvider);
 
         // 设置TTS配置ID
         if (this.selectedProvider === 'edge') {
@@ -812,27 +755,14 @@ export default {
           this.ttsConfigs = [];
           this.$nextTick(() => {
             roleForm.setFieldsValue({
-              ttsId: this.selectedTtsId
+              ttsId: 'edge_default'
             });
           });
         } else {
-          // 检查是否有缓存的TTS配置
-          if (this.cachedTtsConfigs[this.selectedProvider]) {
-            // 使用缓存的配置
-            this.ttsConfigs = this.cachedTtsConfigs[this.selectedProvider];
-            this.selectedTtsId = record.ttsId;
-            this.$nextTick(() => {
-              roleForm.setFieldsValue({
-                ttsId: this.selectedTtsId
-              });
-            });
-          } else {
-            // 加载TTS配置
-            this.ttsConfigLoading = true;
-            this.loadTtsConfigs(this.selectedProvider);
-            // 设置要在加载完成后选中的TTS配置ID
-            this.selectedTtsId = record.ttsId;
-          }
+          // 加载TTS配置
+          this.loadTtsConfigs(this.selectedProvider);
+          // 设置要在加载完成后选中的TTS配置ID
+          this.selectedTtsId = record.ttsId;
         }
 
         // 设置当前选择的性别，以便正确筛选语音
