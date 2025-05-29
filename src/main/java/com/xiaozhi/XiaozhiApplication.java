@@ -11,9 +11,13 @@ import org.springframework.context.annotation.Bean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.xiaozhi.utils.CmsUtils;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @MapperScan("com.xiaozhi.dao")
+@EnableAsync
+@EnableScheduling
 public class XiaozhiApplication {
 
     Logger logger = LoggerFactory.getLogger(XiaozhiApplication.class);

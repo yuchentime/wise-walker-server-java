@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaozhi.dao.CozeUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.xiaozhi.entity.CozeUser">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="INTEGER"/>
+        <result column="gender" property="gender" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="likes" property="likes" jdbcType="VARCHAR"/>
+        <result column="data_source" property="dataSource" jdbcType="VARCHAR"/>
+        <result column="external_user_id" property="externalUserId" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, age, gender, phone, likes, dataSource, cozeUserId, createdAt, updatedAt
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select 
+        <include refid="Base_Column_List" />
+        from coze_user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from coze_user
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insert" parameterType="com.xiaozhi.entity.CozeUser">
+        insert into coze_user (id, name, age, gender, phone, likes, dataSource, cozeUserId, createdAt, updatedAt)
+        values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER}, #{gender,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{likes,jdbcType=VARCHAR}, #{dataSource,jdbcType=VARCHAR}, #{externalUserId,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.xiaozhi.entity.CozeUser">
+        update coze_user
+        set name = #{name,jdbcType=VARCHAR},
+            age = #{age,jdbcType=INTEGER},
+            gender = #{gender,jdbcType=VARCHAR},
+            phone = #{phone,jdbcType=VARCHAR},
+            likes = #{likes,jdbcType=VARCHAR},
+            dataSource = #{dataSource,jdbcType=VARCHAR},
+            cozeUserId = #{cozeUserId,jdbcType=VARCHAR},
+            createdAt = #{createdAt,jdbcType=TIMESTAMP},
+            updatedAt = #{updatedAt,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+</mapper>

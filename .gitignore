@@ -28,7 +28,8 @@ vosk-model*
 .gradle/
 
 # 忽略本地配置文件
-application-local.properties
+application-dev.properties
+application-prod.properties
 
 *Stream*
 .vscode/

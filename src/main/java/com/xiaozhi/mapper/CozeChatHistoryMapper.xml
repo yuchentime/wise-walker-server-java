@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaozhi.dao.CozeChatHistoryMapper">
+
+    <sql id="Base_Column_List">
+        id, dataSource, cozeUserId, content, createdAt
+    </sql>
+
+    <insert id="insert" parameterType="com.xiaozhi.entity.CozeChatHistory">
+        insert into coze_chat_history (dataSource, cozeUserId, content)
+        values (#{dataSource,jdbcType=VARCHAR}, #{cozeUserId,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="selectByConditions" resultType="com.xiaozhi.entity.CozeChatHistory">
+        select
+        <include refid="Base_Column_List" />
+        from coze_chat_history
+        <where>
+            <if test="createdAtStart != null">
+                and createdAt &gt;= #{createdAtStart,jdbcType=TIMESTAMP}
+            </if>
+            <if test="createdAtEnd != null">
+                and createdAt &lt;= #{createdAtEnd,jdbcType=TIMESTAMP}
+            </if>
+            <if test="dataSource != null and dataSource != ''">
+                and dataSource = #{dataSource,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+</mapper>

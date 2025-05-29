@@ -40,4 +40,14 @@ public class DateUtils {
         String formattedTime = decimalFormat.format(deltaTime); // 格式化为字符串
         return Double.parseDouble(formattedTime); // 转换为 Double
     }
+
+    /**
+     * 取得前一天的时间范围，从凌晨到晚上23:59:59
+     */
+    public static String[] getYesterdayTimeRange() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        String yesterday = format.format(calendar.getTime());
+        return new String[]{yesterday + " 00:00:00", yesterday + " 23:59:59"};
+    }
 }
