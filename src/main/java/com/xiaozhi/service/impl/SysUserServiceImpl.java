@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 用户操作

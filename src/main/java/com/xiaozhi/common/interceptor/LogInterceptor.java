@@ -23,7 +23,7 @@ public class LogInterceptor implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        String method = exchange.getRequest().getMethodValue();
+        String method = exchange.getRequest().getMethod().name();
         String remoteAddress = exchange.getRequest().getRemoteAddress() != null ? 
                 exchange.getRequest().getRemoteAddress().getHostString() : "unknown";
 

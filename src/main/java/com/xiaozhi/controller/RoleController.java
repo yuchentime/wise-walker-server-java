@@ -2,7 +2,7 @@ package com.xiaozhi.controller;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import com.github.pagehelper.PageInfo;
 import com.xiaozhi.common.web.AjaxResult;

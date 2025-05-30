@@ -21,7 +21,7 @@ import com.xiaozhi.utils.CmsUtils;
 
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 

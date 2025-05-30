@@ -3,14 +3,16 @@ package com.xiaozhi.websocket.service;
 import com.xiaozhi.utils.OpusProcessor;
 import com.xiaozhi.utils.TarsosNoiseReducer;
 import com.xiaozhi.websocket.vad.impl.SileroVadModel;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;

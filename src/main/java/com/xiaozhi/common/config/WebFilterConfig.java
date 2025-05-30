@@ -7,7 +7,7 @@ import org.springframework.web.server.WebFilter;
 import com.xiaozhi.common.interceptor.AuthenticationInterceptor;
 import com.xiaozhi.common.interceptor.LogInterceptor;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Configuration
 public class WebFilterConfig {

@@ -4,14 +4,16 @@ import com.xiaozhi.entity.SysConfig;
 import com.xiaozhi.entity.SysDevice;
 import com.xiaozhi.websocket.iot.IotDescriptor;
 import com.xiaozhi.websocket.llm.tool.function.FunctionSessionHolder;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Sinks;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;

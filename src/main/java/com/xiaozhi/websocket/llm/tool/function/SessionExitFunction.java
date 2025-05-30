@@ -11,7 +11,7 @@ import com.xiaozhi.websocket.llm.tool.function.bean.description.PropertyDesc;
 import com.xiaozhi.websocket.service.SessionManager;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 退出会话函数

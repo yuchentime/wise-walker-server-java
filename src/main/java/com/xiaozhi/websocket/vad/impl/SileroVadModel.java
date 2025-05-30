@@ -4,6 +4,8 @@ import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import ai.onnxruntime.OrtLoggingLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.xiaozhi.utils.AudioUtils;
 import com.xiaozhi.websocket.vad.VadModel;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 

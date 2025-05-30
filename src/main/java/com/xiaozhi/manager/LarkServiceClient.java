@@ -1,6 +1,8 @@
 package com.xiaozhi.manager;
 
 import cn.hutool.core.collection.CollectionUtil;
+import jakarta.annotation.Resource;
+
 import com.google.gson.JsonParser;
 import com.lark.oapi.Client;
 import com.lark.oapi.core.utils.Jsons;
@@ -8,8 +10,6 @@ import com.lark.oapi.service.bitable.v1.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;

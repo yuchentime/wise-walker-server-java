@@ -10,7 +10,7 @@ import com.xiaozhi.service.SysMessageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 聊天记录

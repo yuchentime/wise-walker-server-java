@@ -2,7 +2,7 @@ package com.xiaozhi.controller;
 
 import java.util.Map;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import com.xiaozhi.common.exception.UserPasswordNotMatchException;
 import com.xiaozhi.common.exception.UsernameNotFoundException;

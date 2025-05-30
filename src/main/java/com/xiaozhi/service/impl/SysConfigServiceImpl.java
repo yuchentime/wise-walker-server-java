@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 模型配置

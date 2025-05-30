@@ -19,7 +19,7 @@ public class LarkScheduler {
     /**
      * 定时任务：每3小时（早上9点 ～ 晚上8点）调用飞书webhook通知
      */
-    @Scheduled(cron = "0 9-20/3 * * * ?")
+    @Scheduled(cron = "0 8-21/3 * * * ?")
     public void callingLarkBot() {
         // 1. 创建OkHttpClient实例
         OkHttpClient client = new OkHttpClient();

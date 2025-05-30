@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 设备操作

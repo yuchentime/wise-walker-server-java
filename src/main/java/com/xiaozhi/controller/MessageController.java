@@ -15,7 +15,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import reactor.core.publisher.Mono;
 
