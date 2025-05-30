@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.4.6</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.xiaozhi.server</groupId>
@@ -14,7 +14,7 @@
     <description></description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>1.21</java.version>
     </properties>
 
     <dependencies>
@@ -28,13 +28,13 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>2.2.2</version>
+            <version>3.0.4</version>
         </dependency>
         <!-- 分页 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
-            <version>1.4.6</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
            <groupId>org.postgresql</groupId>
