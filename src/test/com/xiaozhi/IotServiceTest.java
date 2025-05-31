@@ -8,13 +8,15 @@ import com.xiaozhi.websocket.llm.LlmManager;
 import com.xiaozhi.websocket.llm.tool.function.FunctionSessionHolder;
 import com.xiaozhi.websocket.service.IotService;
 import com.xiaozhi.websocket.service.SessionManager;
+
+import jakarta.annotation.Resource;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 @SpringBootTest

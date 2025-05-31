@@ -1,13 +1,16 @@
 package com.xiaozhi.scheduler;
 
+import java.time.LocalTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import jakarta.annotation.Resource;
 import reactor.core.publisher.Mono;
-import org.springframework.http.MediaType;
 
 @Component
 public class LarkScheduler {
@@ -26,8 +29,16 @@ public class LarkScheduler {
     /**
      * 定时任务：每3小时（早上9点 ～ 晚上8点）调用飞书webhook通知
      */
-    @Scheduled(cron = "0 8-21/3 * * * ?")
+    @Scheduled(cron = "0 0 */3 * * ?")
     public void callingCommunityHospitalLarkBot() {
+        // 当前时间是否处于早上9点到晚上8点
+        LocalTime now = LocalTime.now();
+        LocalTime start = LocalTime.of(8, 0);
+        LocalTime end = LocalTime.of(20, 0);
+        if (now.isBefore(start) || now.isAfter(end)) {
+            logger.info("当前时间不在早上9点到晚上8点之间，不执行任务");
+            return;
+        }
         webClient.post().uri(COMMUNITY_HOSPITAL_MESSAGE_WEBHOOK)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{}")
@@ -46,8 +57,16 @@ public class LarkScheduler {
             });
     }
 
-    @Scheduled(cron = "0 8-21/3 * * * ?")
+    @Scheduled(cron = "0 0 */3 * * ?")
     public void callingOldManServerLarkBot() {
+        // 当前时间是否处于早上9点到晚上8点
+        LocalTime now = LocalTime.now();
+        LocalTime start = LocalTime.of(8, 0);
+        LocalTime end = LocalTime.of(20, 0);
+        if (now.isBefore(start) || now.isAfter(end)) {
+            logger.info("当前时间不在早上9点到晚上8点之间，不执行任务");
+            return;
+        }
         webClient.post().uri(OLD_MAN_SERVER_MESSAGE_WEBHOOK)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{}")
