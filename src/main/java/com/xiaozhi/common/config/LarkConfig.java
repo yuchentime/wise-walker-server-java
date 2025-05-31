@@ -4,6 +4,7 @@ import com.lark.oapi.Client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class LarkConfig {
@@ -18,4 +19,5 @@ public class LarkConfig {
         Client client = Client.newBuilder(appId, appSecret).build();
         return client;
     }
+
 }

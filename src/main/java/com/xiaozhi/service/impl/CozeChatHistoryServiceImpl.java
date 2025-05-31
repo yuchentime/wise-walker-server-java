@@ -4,6 +4,8 @@ import com.xiaozhi.common.constants.SpecialCharactersConst;
 import com.xiaozhi.dao.CozeChatHistoryMapper;
 import com.xiaozhi.entity.CozeChatHistory;
 import com.xiaozhi.service.CozeChatHistoryService;
+
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -18,8 +20,9 @@ public class CozeChatHistoryServiceImpl implements CozeChatHistoryService {
     @Resource
     private CozeChatHistoryMapper cozeChatHistoryMapper;
 
+    @Async("ioBatchExecutor")
     @Override
-    public void add(CozeChatHistory cozeChatHistory) {
+    public void addInAsync(CozeChatHistory cozeChatHistory) {
         cozeChatHistory.setCozeUserId(cozeChatHistory.getDataSource() + SpecialCharactersConst.UNDER_LINE + cozeChatHistory.getCozeUserId());
         cozeChatHistoryMapper.insert(cozeChatHistory);
     }

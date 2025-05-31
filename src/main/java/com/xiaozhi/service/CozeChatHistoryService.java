@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CozeChatHistoryService {
 
-    void add(CozeChatHistory cozeChatHistory);
+    void addInAsync(CozeChatHistory cozeChatHistory);
 
     List<CozeChatHistory> query(String dataSource, Date start, Date end);
 }
