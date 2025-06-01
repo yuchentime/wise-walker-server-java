@@ -1,29 +1,29 @@
 package com.xiaozhi.utils;
 
-import io.github.jaredmdobson.concentus.OpusEncoder;
-import io.github.jaredmdobson.concentus.OpusApplication;
-import io.github.jaredmdobson.concentus.OpusDecoder;
-import io.github.jaredmdobson.concentus.OpusException;
-import io.github.jaredmdobson.concentus.OpusSignal;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PreDestroy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import io.github.jaredmdobson.concentus.OpusApplication;
+import io.github.jaredmdobson.concentus.OpusDecoder;
+import io.github.jaredmdobson.concentus.OpusEncoder;
+import io.github.jaredmdobson.concentus.OpusException;
+import io.github.jaredmdobson.concentus.OpusSignal;
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class OpusProcessor {

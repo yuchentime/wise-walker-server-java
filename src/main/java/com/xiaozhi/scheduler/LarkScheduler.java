@@ -36,7 +36,7 @@ public class LarkScheduler {
         LocalTime start = LocalTime.of(8, 0);
         LocalTime end = LocalTime.of(20, 0);
         if (now.isBefore(start) || now.isAfter(end)) {
-            logger.info("当前时间不在早上9点到晚上8点之间，不执行任务");
+            logger.info("The current time is not between 9 AM and 8 PM, so the task will not be executed.");
             return;
         }
         webClient.post().uri(COMMUNITY_HOSPITAL_MESSAGE_WEBHOOK)
@@ -64,7 +64,7 @@ public class LarkScheduler {
         LocalTime start = LocalTime.of(8, 0);
         LocalTime end = LocalTime.of(20, 0);
         if (now.isBefore(start) || now.isAfter(end)) {
-            logger.info("当前时间不在早上9点到晚上8点之间，不执行任务");
+            logger.info("The current time is not between 9 AM and 8 PM, so the task will not be executed.");
             return;
         }
         webClient.post().uri(OLD_MAN_SERVER_MESSAGE_WEBHOOK)

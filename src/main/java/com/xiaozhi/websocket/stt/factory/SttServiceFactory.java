@@ -1,5 +1,13 @@
 package com.xiaozhi.websocket.stt.factory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.xiaozhi.entity.SysConfig;
 import com.xiaozhi.websocket.stt.SttService;
 import com.xiaozhi.websocket.stt.providers.AliyunSttService;
@@ -7,14 +15,8 @@ import com.xiaozhi.websocket.stt.providers.FunASRSttService;
 import com.xiaozhi.websocket.stt.providers.TencentSttService;
 import com.xiaozhi.websocket.stt.providers.VoskSttService;
 import com.xiaozhi.websocket.token.TokenManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class SttServiceFactory {

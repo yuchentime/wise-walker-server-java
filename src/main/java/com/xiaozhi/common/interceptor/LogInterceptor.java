@@ -29,7 +29,7 @@ public class LogInterceptor implements WebFilter {
 
         return chain.filter(exchange)
                 .doFinally(signalType -> {
-                    // logger.info("Response: {} {} - {}", method, path, exchange.getResponse().getStatusCode());
+                    logger.info("Response: {} {} - {}", method, path, exchange.getResponse().getStatusCode());
                 });
     }
 }
