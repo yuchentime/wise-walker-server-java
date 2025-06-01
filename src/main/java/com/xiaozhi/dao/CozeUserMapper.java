@@ -3,11 +3,10 @@ package com.xiaozhi.dao;
 import com.xiaozhi.entity.CozeUser;
 
 public interface CozeUserMapper {
-    CozeUser selectByPrimaryKey(Integer id);
 
-    int deleteByPrimaryKey(Integer id);
+    CozeUser selectByCozeUser(CozeUser record);
 
     int insert(CozeUser record);
 
-    int updateByPrimaryKey(CozeUser record);
+    int updateByCozeUser(CozeUser record);
 }
