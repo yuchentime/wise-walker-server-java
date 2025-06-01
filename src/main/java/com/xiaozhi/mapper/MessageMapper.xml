@@ -24,8 +24,10 @@
             LEFT JOIN sys_device ON sys_message.deviceId = sys_device.deviceId
             LEFT JOIN sys_role ON sys_message.roleId = sys_role.roleId
         WHERE
-            sys_message.state = 1
-            <if test="userId != null and userId != ''">AND sys_device.userId = #{userId}</if>
+            sys_message.state = '1'
+            <if test="userId != null and userId != ''">
+                AND sys_device.userId = #{userId}
+            </if>
             <if test="deviceId != null and deviceId != ''">
                 AND sys_message.deviceId = #{deviceId}
             </if>

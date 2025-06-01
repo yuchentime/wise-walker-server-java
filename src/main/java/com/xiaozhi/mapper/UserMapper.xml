@@ -39,7 +39,7 @@
             WHERE
                 sys_device.userId = sys_user.userId
                 <if test="startTime != null and startTime != ''">
-                    AND sys_message.createTime &gt;= #{startTime} AND sys_message.createTime &lt;= #{endTime}
+                    AND sys_message.createTime &gt;= CAST(#{startTime} AS TIMESTAMP) AND sys_message.createTime &lt;= CAST(#{endTime} AS TIMESTAMP)
                 </if>
         ) AS totalMessage,
         (
@@ -98,7 +98,7 @@
         WHERE
             code = #{code}
             AND email = #{email}
-            AND createTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)
+            AND createTime &gt;= (NOW() - INTERVAL '10 minutes')
             ORDER BY createTime
             DESC
             LIMIT 1
