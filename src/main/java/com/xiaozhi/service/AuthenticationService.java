@@ -1,4 +1,4 @@
-package com.xiaozhi.security;
+package com.xiaozhi.service;
 
 /**
  * 密码加密与验证

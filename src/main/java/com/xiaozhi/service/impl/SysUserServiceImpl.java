@@ -5,7 +5,7 @@ import com.xiaozhi.common.exception.UserPasswordNotMatchException;
 import com.xiaozhi.common.exception.UsernameNotFoundException;
 import com.xiaozhi.dao.UserMapper;
 import com.xiaozhi.entity.SysUser;
-import com.xiaozhi.security.AuthenticationService;
+import com.xiaozhi.service.AuthenticationService;
 import com.xiaozhi.service.SysUserService;
 import com.xiaozhi.utils.DateUtils;
 

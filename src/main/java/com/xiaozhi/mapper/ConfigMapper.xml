@@ -60,7 +60,7 @@
             LEFT JOIN sys_role ON sys_role.ttsId = sys_config.configId
             LEFT JOIN sys_device ON sys_config.configId = sys_device.sttId
         WHERE
-            sys_config.state = 1
+            sys_config.state = '1'
             <if test="userId != null and userId != ''">AND sys_config.userId = #{userId}</if>
             <if test="isDefault != null and isDefault != ''">AND sys_config.isDefault = #{isDefault}</if>
             <if test="configType != null and configType != ''">AND configType = #{configType}</if>

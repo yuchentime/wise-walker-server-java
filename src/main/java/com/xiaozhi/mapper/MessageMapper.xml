@@ -38,7 +38,7 @@
                 AND sys_message.deviceName = #{deviceName}
             </if>
             <if test="startTime != null and startTime != ''">
-                AND sys_message.createTime &gt;= #{startTime} AND sys_message.createTime &lt;= #{endTime}
+                AND sys_message.createTime &gt;= to_timestamp(#{startTime}, 'YYYY-MM-DD HH24:MI:SS') AND sys_message.createTime &lt;= to_timestamp(#{endTime}, 'YYYY-MM-DD HH24:MI:SS')
             </if>
             <if test="sender != null and sender != ''">
                 AND sys_message.sender = #{sender}

@@ -12,7 +12,7 @@
         FROM
             sys_template
         WHERE
-            sys_template.state = 1
+            sys_template.state = '1'
             AND sys_template.userId = #{userId}
             <if test="templateName != null and templateName != ''">
                 AND template_name like concat('%', #{templateName}, '%')

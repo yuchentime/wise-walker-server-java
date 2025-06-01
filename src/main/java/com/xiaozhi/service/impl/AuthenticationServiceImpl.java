@@ -1,10 +1,12 @@
-package com.xiaozhi.security;
+package com.xiaozhi.service.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.springframework.stereotype.Service;
+
+import com.xiaozhi.service.AuthenticationService;
 
 /**
  * 密码加密与验证
