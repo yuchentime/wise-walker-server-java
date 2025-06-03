@@ -3,7 +3,7 @@
 <mapper namespace="com.xiaozhi.dao.UserMapper">
 
     <sql id="userSql">
-        sys_user.userId, sys_user.username, sys_user.`name`, sys_user.tel, sys_user.email, sys_user.avatar, sys_user.password, sys_user.state, sys_user.isAdmin, sys_user.loginIp, sys_user.loginTime, sys_user.createTime
+        sys_user.userId, sys_user.username, sys_user.name, sys_user.tel, sys_user.email, sys_user.avatar, sys_user.password, sys_user.state, sys_user.isAdmin, sys_user.loginIp, sys_user.loginTime, sys_user.createTime
     </sql>
 
     <select id="selectUserByUsername" resultType="com.xiaozhi.entity.SysUser">
@@ -61,7 +61,7 @@
     </select>
 
     <insert id="add" parameterType="com.xiaozhi.entity.SysUser">
-        INSERT INTO sys_user ( username, `name`, tel, email, password, state, isAdmin )
+        INSERT INTO sys_user ( username, name, tel, email, password, state, isAdmin )
         VALUES
             (#{username}, #{name}, #{tel}, #{email}, #{password}, '1', '0')
     </insert>
@@ -70,7 +70,7 @@
         UPDATE
             sys_user
         <set>
-            <if test="name != null and name != ''">`name` = #{name},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
             <if test="tel != null and tel != ''">tel = #{tel},</if>
             <if test="email != null and email != ''">email = #{email},</if>
             <if test="password != null and password != ''">password = #{password},</if>
@@ -78,7 +78,7 @@
             <if test="state != null and state != ''">state = ${state},</if>
         </set>
         WHERE
-            `username` = #{username}
+            username = #{username}
             <if test="email != null and email != ''">AND email = #{email}</if>
     </update>
 
