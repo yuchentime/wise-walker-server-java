@@ -265,19 +265,12 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
         DataBuffer dataBuffer = message.getPayload();
         try {
             DataBuffer retainedBuffer = DataBufferUtils.retain(dataBuffer);
-            try {
-                byte[] opusData = new byte[retainedBuffer.readableByteCount()];
-                retainedBuffer.read(opusData);
-                return dialogueService.processAudioData(session, opusData);
-            } finally {
-                DataBufferUtils.release(retainedBuffer);
-            }
+            byte[] opusData = new byte[retainedBuffer.readableByteCount()];
+            retainedBuffer.read(opusData);
+            return dialogueService.processAudioData(session, opusData);
         } finally {
             DataBufferUtils.release(dataBuffer); // 如果确定需要释放原始buffer
         }
-
-        // 委托给DialogueService处理音频数据
-        return dialogueService.processAudioData(session, opusData);
     }
 
     private Mono<Void> handleUnboundDevice(WebSocketSession session, SysDevice device) {
