@@ -1,5 +1,18 @@
 package com.xiaozhi.websocket.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xiaozhi.utils.AudioUtils;
+import com.xiaozhi.utils.OpusProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
@@ -8,21 +21,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xiaozhi.utils.AudioUtils;
-import com.xiaozhi.utils.OpusProcessor;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * 音频服务，负责处理音频的非流式发送
@@ -196,11 +194,11 @@ public class AudioService {
             
             // 使用Flux.range创建一个发送序列
             return Flux.range(0, opusFrames.size())
-                    // 让每个元素（即每一帧的索引）之间延迟固定的时间间隔（单位毫秒）
+                    // 使用固定间隔发送帧
                     .delayElements(Duration.ofMillis(OPUS_FRAME_INTERVAL_MS))
                     // 确保在boundedElastic调度器上执行，以避免阻塞
                     .publishOn(Schedulers.boundedElastic())
-                    // 只有当会话仍在播放时才发送（只有当finalPlayingState.get()为true才会发送）
+                    // 只有当会话仍在播放时才发送
                     .takeWhile(i -> finalPlayingState.get())
                     // 发送每一帧
                     .flatMap(i -> {
